@@ -11,44 +11,76 @@ Kc=5.7e-2;
 Jmot=4.7e-5;%Inertie globale
 pas=5e-3;
 m=1.3;
-masse = [ 0 5 10 15 20 25 30 35 40 45 50 55 ];
+masse = [ 0 20 40 ];
 f=1.52e-4;
 Cr=0;%Cn/4;
 Jtot=Jmot+m*(pas/(2*pi))^2;
+Te=1e-4;
 
 Tauf = Jtot / f;
 disp(['Tauf = ', num2str(Tauf)]);
 
-%%%%%%%% proportionelle %%%%%%%
-xi=1;
-K1=f^2*(2*pi)/(Kc*Ka*pas*Jtot*4*xi^2);
-disp(['Correcteur proportionelle K1 = ', num2str(K1)]);
+Kgain=Ka*Kc*pas/(2*pi);
+
+%% Discret %%
+
+Fonction_Transfert_moteur = tf(1,[Tauf, 1, 0]);
+Discret_Transfert_moteur = c2d(Fonction_Transfert_moteur,Te,'impulse');
 
 
-%%%%%%%%% méthode de Kessler l optimum symétrique %%%%%%%
+%% espace d etat %%
+A_etat=[0, 2*pi/pas ; 0, -1/Tauf];
+B_etat=[0 ; Kgain/Jtot];
+C_etat=[1, 0];
 
-Phimax=49*pi/180;
+%%%% espace augmenté %%%
 
-Kgain=Ka*Kc*pas/(2*pi*f);
+% Dimensions de chaque composant
+[nA, mA] = size(A_etat); % Taille de A_etat (2x2)
+[nC, mC] = size(C_etat); % Taille de C_etat (1x2)
 
-a_Kessler = (1+sin(Phimax))/(1-sin(Phimax));
-wo_Kessler = 1/(sqrt(a_Kessler)*Tauf);
-Taui_Kessler = a_Kessler*Tauf;
-Ki_Kessler = wo_Kessler^2 *Taui_Kessler*sqrt(1+(wo_Kessler*Tauf)^2)/(Kgain*sqrt(1+(wo_Kessler*a_Kessler*Tauf)^2));
+% Définition des matrices du système augmenté
+A_etat_augment = [A_etat, zeros(nA, 1); -C_etat, 0]; % A_etat et -C_etat doivent avoir le même nombre de colonnes
+B_etat_augment = [B_etat; 0];                       % B_etat doit avoir le bon nombre de lignes
+C_etat_augment = [C_etat, 0];                       % C_etat doit avoir le bon nombre de colonnes
+
+% Définition des pôles désirés
+P1 = -3;
+P2 = P1*10;
+P = [P1, P1, P2];
+
+% Calcul du gain de retour d'état avec acker
+K_ac = acker(A_etat_augment, B_etat_augment, P);
+
+% Extraction des gains individuels
+K1 = K_ac(1);
+K2 = K_ac(2);
+Kr = K_ac(3);
+Kt=[K1, K2];
+g_comp=Kr/P2;
+
+g_annule=1/(-C_etat*inv(A_etat-B_etat*Kt)*B_etat);
+
+% Affichage des résultats
+disp(['K1 = ', num2str(K1)]);
+disp(['K2 = ', num2str(K2)]);
+disp(['Kr = ', num2str(Kr)]);
+disp([' compensation du pole 3eme pôle, g_comp = ', num2str(g_comp)]);
+disp([' Anulation de régulation, g_annule = ', num2str(g_annule)]);
+
+%%% espace augmenté corrigé %%%
+A_etat_augment_corrige = [A_etat-B_etat*Kt , -B_etat*Kr; -C_etat, 0];
+B_etat_augment_corrige = [B_etat*g_comp; 1];
+C_etat_augment_corrige = [1, 0, 0];
 
 
-%%%%%%%% PID ITAE %%%%%%%%%%
 
-Temps5_ITAE=1;
-wn_ITAE = 3/Temps5_ITAE;
-N_ITAE=2.15*wn_ITAE-1/Tauf;
-Kp_ITAE=(3.14*Tauf*wn_ITAE^2-N_ITAE)/Kgain;
-KI_ITAE=2.7*wn_ITAE^3*Tauf/Kgain-Kp_ITAE;
-Kd_ITAE=wn_ITAE^4*Tauf/Kgain-N_ITAE*KI_ITAE;
+sys_augment=ss(A_etat_augment_corrige,B_etat_augment_corrige,C_etat_augment_corrige,0);
 
 
 
-%%%%%%%%%%%%%%
+
+%%
 
 % Initialisation des matrices pour stocker les résultats
 positions = [];   % Matrice pour stocker les positions
@@ -65,7 +97,7 @@ for k = 1 : length(masse)
     Jnew = Jmot + (m + masse(k)) * (pas / (2 * pi))^2;
 
     % Exécution de la simulation
-    out = sim('Sim_moteur.slx');
+    out = sim('Sim_moteur2.slx');
 
     % Extraction des données de la simulation
     position = out.position.Data;    % Extraction des données numériques de position
@@ -84,11 +116,6 @@ for k = 1 : length(masse)
     end
 end
 
-% Calcul de la valeur finale de la consigne
-valeur_finale = consignes(end, 1);
-
-% Détermination du seuil de réponse à 95% de la valeur finale
-seuil = 0.95 * valeur_finale;
 
 % Affichage des résultats en une seule fois après la boucle
 figure(1)
@@ -96,6 +123,10 @@ figure(1)
 subplot(2,1,1);
 hold on;
 for k = 1 : length(masse)
+    % Calcul de la valeur finale de la consigne
+    valeur_finale = positions(end, k);
+    % Détermination du seuil de réponse à 95% de la valeur finale
+    seuil = 0.95 * valeur_finale;
     % Calcul du temps de réponse pour la masse actuelle
     indice_reponse = find(positions(:,k) >= seuil, 1);
     Temps_de_reponse(1,k)=time_vector(indice_reponse);
@@ -143,3 +174,15 @@ title('Temps de réponse à 5% pour différentes masses');
 legend show;
 grid on;
 
+figure(3)
+
+impulse(Fonction_Transfert_moteur,Discret_Transfert_moteur);
+
+
+figure(4)
+iopzmap(sys_augment);
+hold on 
+cercle(0,0,1);
+hold off
+title('Système 0');
+grid on;
