@@ -2,8 +2,6 @@ clear all
 close all
 clc
 
-tic;% Début de la mesure du temps
-
 F_MLI=10e3;                    %fréquence de MLI
 T_MLI=1/F_MLI;
 V_MLI=540;                      %tension MLI à partir d une source continue de 540 v.
@@ -25,7 +23,6 @@ T_meca=J/frot;
 T_charge=0;
 Trau=T_meca*1e-3;
 Rsr=Rs+Rr*(Msr/Lr)^2;
-
 
 %%%%%%%%%%% moteur %%%%%%%%%%%%%%
 abc_alpha_beta = sqrt(2/3) * [1, -1/2, -1/2; 
@@ -60,15 +57,25 @@ onduleur= V_MLI/3*[2,-1,-1;
             -1,-1,2];
     
 
+%%%%%
+xi_reg=1;
+wo_reg_courant=F_MLI/sqrt(100);
 
-sim('MAS_new'); 
-elapsed_time2 = toc;% Fin de la mesure du temps
-fprintf('Le temps de calcul de la simulation MAS_new est de %.4f secondes.\n', elapsed_time2);
+ki= 2*wo_reg_courant*sigma*Ls*xi_reg-Rsr;
+Ti=ki/(wo_reg_courant^2*Ls*sigma);
 
-xi=1;
-wo=F_MLI/sqrt(100);
-ki= 2*wo*sigma*Ls*xi-Rsr;
-Ti=ki/(wo^2*Ls*sigma);
+%%%%%
+xi_reg_flux=1;
+wo_reg_flux=wo_reg_courant/10;
+K_reg_flux=(2*xi_reg_flux*wo_reg_flux*Lr/Rr-1)/Msr;
+T_reg_flux=Msr*K_reg_flux*Lr/(Rr*wo_reg_flux^2);
 
 
+%%%%%%%
+
+%%%% pour xi = 1, wo*t5% = 4.5 et on veux t5% = 0.4s
+xi_reg_vitesse=1;
+wo_reg_vitesse=45/4;
+K_reg_vitesse=(2*xi_reg_vitesse*wo_reg_vitesse*T_meca-1)*frot;
+T_reg_vitesse=K_reg_vitesse/(T_meca*frot*wo_reg_vitesse^2);
 
