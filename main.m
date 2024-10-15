@@ -60,14 +60,13 @@ onduleur= V_MLI/3*[2,-1,-1;
 %%%%%
 xi_reg=1;
 wo_reg_courant=F_MLI/sqrt(100);
-
 ki= 2*wo_reg_courant*sigma*Ls*xi_reg-Rsr;
 Ti=ki/(wo_reg_courant^2*Ls*sigma);
 
 %%%%%
 xi_reg_flux=1;
 wo_reg_flux=wo_reg_courant/10;
-K_reg_flux=(2*xi_reg_flux*wo_reg_flux*Lr/Rr-1)/Msr;
+K_reg_flux=2*xi_reg_flux*wo_reg_flux*Lr/Rr-1/Msr;
 T_reg_flux=Msr*K_reg_flux*Lr/(Rr*wo_reg_flux^2);
 
 
