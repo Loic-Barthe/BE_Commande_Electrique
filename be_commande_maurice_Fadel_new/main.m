@@ -74,7 +74,7 @@ T_reg_flux=Msr*K_reg_flux*Lr/(Rr*wo_reg_flux^2);
 %%%%%%%
 %%%% pour xi = 1, wo*t5% = 4.5 et on veux t5% = 0.4s
 xi_reg_vitesse=1;
-wo_reg_vitesse= wo_reg_flux/sqrt(10) %45/4;
+wo_reg_vitesse= wo_reg_flux/sqrt(10); %45/4;
 K_reg_vitesse=(2*xi_reg_vitesse*wo_reg_vitesse*T_meca-1)*frot;
 T_reg_vitesse=K_reg_vitesse/(T_meca*frot*wo_reg_vitesse^2);
 
