@@ -4,6 +4,7 @@ clc
 
 F_MLI=10e3;                    %fréquence de MLI
 T_MLI=1/F_MLI;
+Tfiltre = 1e-5;
 V_MLI=540;                      %tension MLI à partir d une source continue de 540 v.
 p=2;                            %deux paires de pôles
 Pn=4000;                        %Puissance nominale
@@ -58,23 +59,28 @@ onduleur= V_MLI/3*[2,-1,-1;
     
 
 %%%%%
-xi_reg=1;
-wo_reg_courant=F_MLI/sqrt(100);
+xi_reg=1.2;
+wo_reg_courant=F_MLI/sqrt(400);
+
 ki= 2*wo_reg_courant*sigma*Ls*xi_reg-Rsr;
 Ti=ki/(wo_reg_courant^2*Ls*sigma);
 
 %%%%%
 xi_reg_flux=1;
-wo_reg_flux=wo_reg_courant/10;
-K_reg_flux=2*xi_reg_flux*wo_reg_flux*Lr/Rr-1/Msr;
-T_reg_flux=Msr*K_reg_flux*Lr/(Rr*wo_reg_flux^2);
+%wo_reg_flux=wo_reg_courant/sqrt(400);
+wo_reg_flux = 7.5;
 
+K_reg_flux=(2*xi_reg_flux*wo_reg_flux*Lr/Rr-1)/Msr;
+T_reg_flux=Msr*K_reg_flux*Lr/(Rr*wo_reg_flux^2);
+%T_reg_flux = Msr/(wo_reg_flux^2*Lr/Rr);
 
 %%%%%%%
 
 %%%% pour xi = 1, wo*t5% = 4.5 et on veux t5% = 0.4s
 xi_reg_vitesse=1;
-wo_reg_vitesse=45/4;
+wo_reg_vitesse= wo_reg_flux/sqrt(10); %45/4;
 K_reg_vitesse=(2*xi_reg_vitesse*wo_reg_vitesse*T_meca-1)*frot;
 T_reg_vitesse=K_reg_vitesse/(T_meca*frot*wo_reg_vitesse^2);
 
+Kpi=ws*20;
+Tin=sqrt(10)/Kpi;
