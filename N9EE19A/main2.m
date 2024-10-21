@@ -73,27 +73,29 @@ kc2= (2*xi*wo1*T2-1)/K22;
 
 
 %%%%%% commande %%%%%%
-Com_V1=5*V01;
-delay_Com_V1=1.5;
 
-Com_V2=5*V02;
-delay_Com_V2=0.5;
+Com_H1=1.3*H01^2;
+delay_Com_H1=1.5;
 
+Com_H2=1.3*H02^2;
+delay_Com_H2=0.5;
 
-
+Com_H1_sched=[ 1 2 3 2 4 5 2 6 2 ]*H01^2;
+Com_H2_sched=[ 1 2 3 2 4 5 2 6 2 ]*H02^2;
+T_plage=2;
 
 %% appel de la simulation %%
-out = sim('Sim.slx');
+out = sim('Sim2.slx');
 
 % Extraction des paramètres depuis la structure de simulation
-consigne_V1 = out.consigne_V1.Data;
-consigne_V2 = out.consigne_V2.Data;
-time = out.consigne_V1.Time;        % Extraction du vecteur temps
+consigne_H1 = out.consigne_H1.Data; % Extraction des données du signal
+consigne_H2 = out.consigne_H2.Data;
+time = out.consigne_H1.Time;        % Extraction du vecteur temps
 
-h_ouvert_lineaire = out.h_ouvert_lineaire.Data;
-dh_ouvert_lineaire = out.dh_ouvert_lineaire.Data;
-h_ouvert_non_lineaire = out.h_ouvert_non_lineaire.Data;
-dh_ouvert_non_lineaire = out.dh_ouvert_non_lineaire.Data;
+h_PI_lineaire = out.h_PI_lineaire.Data;
+dh_PI_lineaire = out.dh_PI_lineaire.Data;
+h_PI_non_lineaire = out.h_PI_non_lineaire.Data;
+dh_PI_non_lineaire = out.dh_PI_non_lineaire.Data;
 
 %% Tracer les résultats %%
 colors = [
@@ -111,13 +113,16 @@ subplot(2,2,1)
 hold on;
 for k = 1:4  % Débuter la boucle à 1, car les indices commencent à 1 en MATLAB
     % Tracé de chaque courbe avec une couleur différente
-    plot(time, h_ouvert_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
+    plot(time, h_PI_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
         'DisplayName', ['h' num2str(k)]);
 end
+% Tracé des consignes H1 et H2
+plot(time, consigne_H1, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H1');
+plot(time, consigne_H2, '-.', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H2');
 hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
-title('Hauteur en boucle ouvert linéaire');
+title('Hauteur en boucle PI linéaire');
 legend show;
 grid on;
 
@@ -125,7 +130,7 @@ subplot(2,2,3)
 hold on;
 for k = 1:4  % Débuter la boucle à 1, car les indices commencent à 1 en MATLAB
     % Tracé de chaque courbe avec une couleur différente
-    plot(time, dh_ouvert_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
+    plot(time, dh_PI_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
         'DisplayName', ['dh/dt' num2str(k)]);
 end
 hold off
@@ -139,13 +144,16 @@ subplot(2,2,2)
 hold on;
 for k = 1:4  % Débuter la boucle à 1, car les indices commencent à 1 en MATLAB
     % Tracé de chaque courbe avec une couleur différente
-    plot(time, h_ouvert_non_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
+    plot(time, h_PI_non_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
         'DisplayName', ['h' num2str(k)]);
 end
+% Tracé des consignes H1 et H2
+plot(time, consigne_H1, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H1');
+plot(time, consigne_H2, '-.', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H2');
 hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
-title('Hauteur en boucle ouvert non linéaire');
+title('Hauteur en boucle PI non linéaire');
 legend show;
 grid on;
 
@@ -153,7 +161,7 @@ subplot(2,2,4)
 hold on;
 for k = 1:4  % Débuter la boucle à 1, car les indices commencent à 1 en MATLAB
     % Tracé de chaque courbe avec une couleur différente
-    plot(time, dh_ouvert_non_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
+    plot(time, dh_PI_non_lineaire(:,k), 'Color', colors(k,:), 'LineWidth', 1.5, ...
         'DisplayName', ['dh/dt' num2str(k)]);
 end
 hold off
@@ -162,21 +170,6 @@ ylabel('dH/dt (m.s^{-1})');
 title('dH/dt non linéaire');
 legend show;
 grid on;
-
-
-figure(2)
-
-% Tracé des consignes H1 et H2
-plot(time, consigne_V1, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne V1');
-hold on;
-plot(time, consigne_V2, '-.', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne V2');
-hold off
-xlabel('Temps (s)');
-ylabel('consigne');
-title('Consigne V1 et V2');
-legend show;
-grid on;
-
 
 
 
