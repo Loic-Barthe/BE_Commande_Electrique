@@ -2,6 +2,8 @@ clear all
 close all
 clc
 %%% cc baethbeaht
+%%%%% wesh mon grand
+
 %%%%%%%% Paramètre du système %%%%%%%%
 A1=28e-4;
 A2=32e-4;
