@@ -2,6 +2,8 @@ clear all
 close all
 clc
 
+
+%%%a modifier
 %%%%%%%% Paramètre du système %%%%%%%%
 A1=28e-4;
 A2=32e-4;
@@ -61,9 +63,9 @@ K11=T1*gamma1*k1/A1;
 K22=T2*gamma2*k2/A2;
 
 
-xi=1;
-wo1=100/T1;
-wo2=100/T2;
+xi=30;
+wo1=6;
+wo2=6;
 
 Tc1= 2*xi/wo1-1/(T1*wo1^2);
 kc1= (2*xi*wo1*T1-1)/K11;
@@ -88,8 +90,9 @@ T_plage=2;
 
 %[ 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 ]
 %[ 1 2 3 4 5 6 ]
-H1_sched=[ 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 ]*H01^2;
-H2_sched=[ 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 ]*H02^2;
+n=20;
+H1_sched=linspace(1,7,n)*H01^2;
+H2_sched=linspace(1,7,n)*H02^2;
 
 % Préallocation des matrices de sortie
 num_H1 = length(H1_sched);
@@ -129,7 +132,7 @@ disp(Tc2new);
 
 
 %% appel de la simulation %%
-out = sim('Sim3.slx');
+out = sim('Sim4.slx');
 
 % Extraction des paramètres depuis la structure de simulation
 consigne_H1 = out.consigne_H1.Data; % Extraction des données du signal
@@ -140,6 +143,11 @@ h_PI_lineaire = out.h_PI_lineaire.Data;
 dh_PI_lineaire = out.dh_PI_lineaire.Data;
 h_PI_non_lineaire = out.h_PI_non_lineaire.Data;
 dh_PI_non_lineaire = out.dh_PI_non_lineaire.Data;
+
+h_PI_lineaire1 = out.h_PI_lineaire1.Data;
+dh_PI_lineaire1 = out.dh_PI_lineaire1.Data;
+h_PI_non_lineaire1 = out.h_PI_non_lineaire1.Data;
+dh_PI_non_lineaire1 = out.dh_PI_non_lineaire1.Data;
 
 %% Tracer les résultats %%
 colors = [
@@ -157,6 +165,7 @@ subplot(2,2,1)
 plot(time, h_PI_lineaire(:,1), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['h' num2str(1)]);
 % Tracé des consignes H1
 hold on;
+plot(time, h_PI_lineaire1(:,1), '-.', 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['h' num2str(1)]);
 plot(time, consigne_H1, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H1');
 hold off
 xlabel('Temps (s)');
@@ -166,7 +175,10 @@ legend show;
 grid on;
 
 subplot(2,2,3)
-plot(time, h_PI_lineaire(:,3), 'Color', colors(3,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+plot(time, h_PI_lineaire(:,3), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+hold on 
+plot(time, h_PI_lineaire1(:,3),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
 title('Hauteur H3 en boucle PI linéaire');
@@ -174,9 +186,10 @@ legend show;
 grid on;
 
 subplot(2,2,2)
-plot(time, h_PI_lineaire(:,2), 'Color', colors(2,:), 'LineWidth', 1.5,'DisplayName', ['h' num2str(2)]);
+plot(time, h_PI_lineaire(:,2), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['h' num2str(2)]);
 % Tracé des consignes H1
 hold on;
+plot(time, h_PI_lineaire1(:,2),'-.', 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['h' num2str(2)]);
 plot(time, consigne_H2, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H2');
 hold off
 xlabel('Temps (s)');
@@ -186,7 +199,10 @@ legend show;
 grid on;
 
 subplot(2,2,4)
-plot(time, h_PI_lineaire(:,4), 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+plot(time, h_PI_lineaire(:,4), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+hold on 
+plot(time, h_PI_lineaire1(:,4),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
 title('Hauteur H4 en boucle PI linéaire');
@@ -199,6 +215,7 @@ figure(2)
 subplot(2,2,1)
 plot(time, h_PI_non_lineaire(:,1), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(1)]);
 hold on;
+plot(time, h_PI_non_lineaire1(:,1),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(1)]);
 plot(time, consigne_H1, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H1');
 hold off
 xlabel('Temps (s)');
@@ -208,7 +225,10 @@ legend show;
 grid on;
 
 subplot(2,2,3)
-plot(time, h_PI_non_lineaire(:,3), 'Color', colors(3,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+plot(time, h_PI_non_lineaire(:,3), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+hold on
+plot(time, h_PI_non_lineaire1(:,3),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(3)]);
+hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
 title('Hauteur H3 en boucle PI non linéaire');
@@ -216,8 +236,9 @@ legend show;
 grid on;
 
 subplot(2,2,2)
-plot(time, h_PI_non_lineaire(:,2), 'Color', colors(2,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(2)]);
+plot(time, h_PI_non_lineaire(:,2), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(2)]);
 hold on;
+plot(time, h_PI_non_lineaire1(:,2),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(2)]);
 plot(time, consigne_H2, '--', 'Color', 'k', 'LineWidth', 1.5, 'DisplayName', 'Consigne H2');
 hold off
 xlabel('Temps (s)');
@@ -227,7 +248,10 @@ legend show;
 grid on;
 
 subplot(2,2,4)
-plot(time, h_PI_non_lineaire(:,4), 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+plot(time, h_PI_non_lineaire(:,4), 'Color', colors(1,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+hold on 
+plot(time, h_PI_non_lineaire1(:,4),'-.', 'Color', colors(4,:), 'LineWidth', 1.5, 'DisplayName', ['h' num2str(4)]);
+hold off
 xlabel('Temps (s)');
 ylabel('Hauteur (m)');
 title('Hauteur H4 en boucle PI non linéaire');
@@ -240,6 +264,9 @@ figure(3)
 % Tracé des courbes de hauteur en boucle ouverte linéaire
 subplot(2,2,1)
 plot(time, dh_PI_lineaire(:,1), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(1)]);
+hold on 
+plot(time, dh_PI_lineaire1(:,1), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(1)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH1/dt (m.s^{-1})');
 title('dH1/dt linéaire');
@@ -248,7 +275,10 @@ grid on;
 
 
 subplot(2,2,3)
-plot(time, dh_PI_lineaire(:,3), 'Color', colors(3,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+plot(time, dh_PI_lineaire(:,3), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+hold on 
+plot(time, dh_PI_lineaire1(:,3), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH3/dt (m.s^{-1})');
 title('dH3/dt linéaire');
@@ -256,7 +286,10 @@ legend show;
 grid on;
 
 subplot(2,2,2)
-plot(time, dh_PI_lineaire(:,2), 'Color', colors(2,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+plot(time, dh_PI_lineaire(:,2), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+hold on 
+plot(time, dh_PI_lineaire1(:,2), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH2/dt (m.s^{-1})');
 title('dH2/dt linéaire');
@@ -264,7 +297,10 @@ legend show;
 grid on;
 
 subplot(2,2,4)
-plot(time, dh_PI_lineaire(:,4), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+plot(time, dh_PI_lineaire(:,4), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+hold on 
+plot(time, dh_PI_lineaire1(:,4), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH4/dt (m.s^{-1})');
 title('dH4/dt linéaire');
@@ -275,6 +311,9 @@ figure(4)
 % Tracé des courbes de hauteur en boucle ouverte linéaire
 subplot(2,2,1)
 plot(time, dh_PI_non_lineaire(:,1), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(1)]);
+hold on 
+plot(time, dh_PI_non_lineaire1(:,1), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(1)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH1/dt (m.s^{-1})');
 title('dH1/dt non linéaire');
@@ -282,7 +321,10 @@ legend show;
 grid on;
 
 subplot(2,2,3)
-plot(time, dh_PI_non_lineaire(:,3), 'Color', colors(3,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+plot(time, dh_PI_non_lineaire(:,3), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+hold on 
+plot(time, dh_PI_non_lineaire1(:,3), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(3)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH3/dt (m.s^{-1})');
 title('dH3/dt non linéaire');
@@ -290,7 +332,10 @@ legend show;
 grid on;
 
 subplot(2,2,2)
-plot(time, dh_PI_non_lineaire(:,2), 'Color', colors(2,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+plot(time, dh_PI_non_lineaire(:,2), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+hold on 
+plot(time, dh_PI_non_lineaire1(:,2), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(2)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH2/dt (m.s^{-1})');
 title('dH2/dt non linéaire');
@@ -298,12 +343,12 @@ legend show;
 grid on;
 
 subplot(2,2,4)
-plot(time, dh_PI_non_lineaire(:,4), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+plot(time, dh_PI_non_lineaire(:,4), 'Color', colors(1,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+hold on 
+plot(time, dh_PI_non_lineaire1(:,4), 'Color', colors(4,:), 'LineWidth', 1.5,'DisplayName', ['dh/dt' num2str(4)]);
+hold off
 xlabel('Temps (s)');
 ylabel('dH4/dt (m.s^{-1})');
 title('dH4/dt non linéaire');
 legend show;
 grid on;
-
-
-
