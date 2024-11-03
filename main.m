@@ -86,7 +86,7 @@ ki_reg_flux=K_reg_flux/T_reg_flux;
 
 %%%%%%%
 xi_reg_vitesse=1;
-wo_reg_vitesse= wo_reg_flux/20; %45/4;
+wo_reg_vitesse= wo_reg_flux/20; 
 K_reg_vitesse=(2*xi_reg_vitesse*wo_reg_vitesse*T_meca-1)*frot;
 T_reg_vitesse=K_reg_vitesse/(T_meca*frot*wo_reg_vitesse^2);
 
@@ -125,18 +125,18 @@ kp_reg_vitesse=K_reg_vitesse/T_reg_vitesse;
 
 %%%%% observateur
 
-A_observateur=[-Rsr/(rau*Ls), 0, Msr*Rr/(rau*Ls*Lr^2), 0; 
-                0,-Rsr/(rau*Ls), 0, Msr*Rr/(rau*Ls*Lr^2); 
-                Msr*Rr/Lr, 0, Rr/Lr, 0; 
-                0, Msr*Rr/Lr,0, Rr/Lr];
+A_observateur=[-Rsr/(sigma*Ls), 0, Msr*Rr/(sigma*Ls*Lr^2), 0; 
+                0,-Rsr/(sigma*Ls), 0, Msr*Rr/(sigma*Ls*Lr^2); 
+                Msr*Rr/Lr, 0, -Rr/Lr, 0; 
+                0, Msr*Rr/Lr,0, -Rr/Lr];
 
-A_ob_w=[0, 0, 0, Msr*Rr/(rau*Ls*Lr); 
-        0, 0, -Msr*Rr/(rau*Ls*Lr), 0; 
+A_ob_w=[0, 0, 0, Msr*Rr/(sigma*Ls*Lr); 
+        0, 0, -Msr*Rr/(sigma*Ls*Lr), 0; 
         0, 0, 0, -1; 
         0, 0 1, 0];
 
-B_observateur=[1/(rau*Ls),0;
-            0, 1/(rau*Ls);
+B_observateur=[1/(sigma*Ls),0;
+            0, 1/(sigma*Ls);
             0, 0;
             0, 0];
 
@@ -144,7 +144,7 @@ C_observateur=[1,0,0,0;
                 0,1,0,0];
 
 %%%placement des poles
-Pole=1;
+Pole=10;
 
 K_observateur=[-Rs/Ls-2*Pole, 0;
                 0, -Rs/Ls-2*Pole;
@@ -276,8 +276,8 @@ plot(time, w_mec, 'b', 'LineWidth', 1.5); % Plot w_mec in blue
 hold off;
 title('Vitesse Électrique et Mécanique');
 xlabel('Temps (s)');
-ylabel('Vitesse (rad/s)');
-legend('w\_elec', 'w\_mec');
+ylabel('Vitesse (tr/min)');
+legend('\Omega_{elec}', '\Omega_{mec}');
 grid on;
 
 % Second subplot: Puissance
